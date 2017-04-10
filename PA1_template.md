@@ -1,49 +1,55 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
 
-```{r warning=FALSE, message=FALSE}
+
+```r
 ds = read.csv("./activity/activity.csv", sep=",")
 ```
 
 ### What is mean total number of steps taken per day?  
   
 #### We must
-```{r}
+
+```r
 dsh = aggregate(steps ~ date, data=ds, FUN=sum)
 ```
 
 #### Histogram of Total number of steps for each day:
-```{r}
+
+```r
 hist(dsh$steps, main="Total steps per day", xlab="Total steps per day")
-```  
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
   
 #### Mean:
-```{r} 
+
+```r
 mean(dsh$steps) 
 ```
+
+```
+## [1] 10766.19
+```
 #### Median:
-```{r} 
+
+```r
 median(dsh$steps) 
-``` 
+```
+
+```
+## [1] 10765
+```
 
 ## What is the average daily activity pattern?  
 #### First we need to know the mean number of steps  
 #### of the subjects for each interval  
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-library(stringr)
-library(lubridate)
-library(dplyr)
-library(ggplot2)
-```
-```{r}
+
+
+```r
 mspi = aggregate(steps ~  interval, data=ds, FUN=mean)
 time = str_pad(mspi$interval*100, 6, pad="0")
 time = paste(
@@ -54,21 +60,27 @@ time = paste(
 time = as.POSIXct(time, format = "%H:%M:%S")
 mspi = mutate(mspi, time=time)
 plot(mspi$time, mspi$steps, type="l", xlab="5 min. intervals", ylab="Steps", main="Average steps per interval")
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
   
     
     
 ## Imputing missing values
   
 #### Number of empty rows:
-```{r}
+
+```r
 sum(is.na(ds$steps))
 ```
 
-#### Missing value will be filled with mean of the interval
-```{r}
+```
+## [1] 2304
+```
 
+#### Missing value will be filled with mean of the interval
+
+```r
 ## Now we need means for each intervals, without NA values
 mspi = aggregate(steps ~ interval, data=ds, FUN=mean, na.rm=TRUE) 
 colnames(mspi)[2] = "mspi"
@@ -82,26 +94,41 @@ ds1[is.na(ds$steps),"steps"] = ds1[is.na(ds$steps),"mspi"]
 sum(is.na(ds1$steps))
 ```
 
+```
+## [1] 0
+```
+
 #### Now let's see that histogram again
   
 
-```{r echo=FALSE}
-dsh = aggregate(steps ~ date, data=ds1, FUN=sum)
-```
+
 
 #### Histogram of Total number of steps for each day:
-```{r}
+
+```r
 hist(dsh$steps, main="Total steps per day", xlab="Total steps per day")
-```  
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
   
 #### Mean:
-```{r} 
+
+```r
 mean(dsh$steps) 
 ```
+
+```
+## [1] 10766.19
+```
 #### Median:
-```{r} 
+
+```r
 median(dsh$steps) 
-``` 
+```
+
+```
+## [1] 10766.19
+```
 
 #### Hmmm.. Seems like there is no impact !!  
   
@@ -109,7 +136,8 @@ median(dsh$steps)
 ## Are there differences in activity patterns between weekdays and weekends?
 
 
-```{r}
+
+```r
   ## We must add a factor that will tell us if it's a weekday or a weekend
   ds2 = mutate(ds1[,1:3], dow=ifelse(wday(date) %in% c(1,7),"weekend","weekday"))
 
@@ -130,8 +158,11 @@ median(dsh$steps)
 ```
 
 #### Shall we see these plots please?
-```{r}
+
+```r
 library(lattice)
 xyplot(mspi ~ interval | dow, data = ds2, layout=c(1,2), type="l", ylab="Average number of steps per interval")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
 
